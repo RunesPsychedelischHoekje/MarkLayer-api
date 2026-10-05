@@ -3,10 +3,11 @@ import time
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 
 from app.config import get_settings
 from app.engine import Engine
-from app.errors import ApiError, api_error_handler
+from app.errors import ApiError, api_error_handler, validation_error_handler
 from app.routers import v1
 
 settings = get_settings()
@@ -37,6 +38,7 @@ app = FastAPI(
     ),
 )
 app.add_exception_handler(ApiError, api_error_handler)
+app.add_exception_handler(RequestValidationError, validation_error_handler)
 app.include_router(v1.router)
 
 

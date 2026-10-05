@@ -128,6 +128,17 @@ def test_rejects_bad_input(client, photo, engine, monkeypatch):
     assert r.status_code == 413 and r.json()["error"]["code"] == "image_too_large"
 
 
+def test_parameter_errors_use_the_standard_shape(client, photo):
+    r = mark(client, photo, kind="hand_drawn", quality="200")
+    assert r.status_code == 422
+    err = r.json()["error"]
+    assert err["code"] == "invalid_request"
+    assert {f["field"] for f in err["fields"]} == {"kind", "quality"}
+    assert "kind:" in err["message"] and "quality:" in err["message"]
+    r = client.post("/v1/mark")  # no file at all
+    assert r.json()["error"]["fields"] == [{"field": "file", "message": "Field required"}]
+
+
 def test_upload_size_limit(client, engine, monkeypatch):
     monkeypatch.setattr(engine.settings, "max_upload_mb", 1)
     r = mark(client, b"\xff\xd8\xff" + b"0" * (2**20 + 10))

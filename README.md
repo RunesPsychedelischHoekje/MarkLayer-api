@@ -22,7 +22,7 @@ C2PA verifier (e.g. contentcredentials.org/verify) reads our manifest.
 python -m venv .venv
 .venv/Scripts/pip install -r requirements-dev.txt
 .venv/Scripts/python scripts/fetch_assets.py    # watermark models (64 MB) + C2PA trust lists
-.venv/Scripts/python -m pytest                  # 44 tests, no network needed after fetch_assets
+.venv/Scripts/python -m pytest                  # 45 tests, no network needed after fetch_assets
 .venv/Scripts/fastapi dev app/main.py           # docs at http://127.0.0.1:8000/docs
 ```
 

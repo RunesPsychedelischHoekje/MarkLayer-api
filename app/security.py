@@ -2,9 +2,10 @@
 import secrets
 from typing import Annotated
 
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, Header
 
 from app.config import Settings, get_settings
+from app.errors import ApiError
 
 
 def verify_rapidapi(
@@ -17,7 +18,4 @@ def verify_rapidapi(
     if not x_rapidapi_proxy_secret or not secrets.compare_digest(
         x_rapidapi_proxy_secret, settings.rapidapi_proxy_secret
     ):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Direct access is not allowed. Subscribe via RapidAPI.",
-        )
+        raise ApiError(403, "direct_access", "Direct access is not allowed. Subscribe via RapidAPI.")

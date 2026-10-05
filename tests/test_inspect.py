@@ -122,6 +122,8 @@ def test_rapidapi_secret_enforced(client, engine):
     app.dependency_overrides[get_settings] = lambda: Settings(rapidapi_proxy_secret="s3cret")
     r = client.post("/v1/inspect", files={"file": ("x", sample("photo.jpg"))})
     assert r.status_code == 403
+    assert r.json() == {"error": {"code": "direct_access",
+                                  "message": "Direct access is not allowed. Subscribe via RapidAPI."}}
     r = client.post("/v1/inspect", files={"file": ("x", sample("photo.jpg"))},
                     headers={"X-RapidAPI-Proxy-Secret": "s3cret"})
     assert r.status_code == 200

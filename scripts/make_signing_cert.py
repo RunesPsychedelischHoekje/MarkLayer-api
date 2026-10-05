@@ -3,8 +3,9 @@
     python scripts/make_signing_cert.py "Your Company Name"
 
 Writes to ./secrets/ (git-ignored). Paste signer-chain.pem into Render's SIGNING_CERT_PEM and
-signer-key.pem into SIGNING_KEY_PEM. Keep ca-key.pem offline: you only need it to issue a new
-signing certificate when this one expires (397 days).
+signer-key.pem into SIGNING_KEY_PEM. The CA's private key is never saved: when the signing
+certificate expires (397 days), move secrets/ aside and run this again for a fresh identity.
+Manifests signed earlier stay valid because each signature carries a trusted timestamp (TSA_URL).
 
 Verifiers will show this signer as "untrusted" (valid signature, not on the C2PA trust list).
 Becoming trusted means passing the C2PA conformance programme and buying a certificate from a CA

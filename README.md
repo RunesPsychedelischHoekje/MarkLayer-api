@@ -32,7 +32,8 @@ the two PEM files in the host's environment variables (see `.env.example`).
 
 ## Deploy (Render)
 
-`render.yaml` is a Blueprint: Starter plan, Frankfurt, models fetched at Docker build. Set
+`render.yaml` is a Blueprint: free plan for a test deploy (switch to Starter, $7/mo, before selling:
+the free plan sleeps when idle), Frankfurt, models fetched at Docker build. Set
 `RAPIDAPI_PROXY_SECRET`, `SIGNING_CERT_PEM` and `SIGNING_KEY_PEM` when Render asks.
 
 Memory decides the plan. Measured peak RSS while marking (models alone ~215 MB):
@@ -43,7 +44,7 @@ Memory decides the plan. Measured peak RSS while marking (models alone ~215 MB):
 | 8.4 MP | 480 MB |
 | 16.8 MP (4096²) | 625 MB |
 
-So Starter (512 MB) runs with `MAX_MEGAPIXELS=4.5`, one job at a time. Standard (2 GB) runs the
+So Free or Starter (512 MB) run with `MAX_MEGAPIXELS=4.5`, one job at a time. Standard (2 GB) runs the
 defaults (17 MP) with `MAX_CONCURRENT_JOBS=2`.
 
 ## How it works

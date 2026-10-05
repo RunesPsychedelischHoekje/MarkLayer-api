@@ -3,12 +3,14 @@ services:
   - type: web
     name: marklayer-api
     runtime: docker
-    # Starter ($7/mo, 512 MB, always on). Measured peak RSS while marking: 375 MB at 4.2 MP,
-    # 480 MB at 8.4 MP, 625 MB at 16.8 MP. So on Starter we cap uploads at 4.5 MP, one job at a time.
-    # That covers normal AI-generator output (1024-2048 px). For 4096 px upscales switch to
-    # Standard (2 GB) and set MAX_MEGAPIXELS=17, MAX_CONCURRENT_JOBS=2.
-    # Not the free plan: it sleeps when idle and every wake-up reloads the 64 MB of models.
-    plan: starter
+    # Free plan for the first test deploy (no billing needed). It sleeps after 15 min idle and each
+    # wake-up reloads the 64 MB of models (~1 min), so switch to Starter ($7/mo, same 512 MB,
+    # always on) in the dashboard before listing on RapidAPI.
+    # Measured peak RSS while marking: 375 MB at 4.2 MP, 480 MB at 8.4 MP, 625 MB at 16.8 MP.
+    # So on 512 MB we cap uploads at 4.5 MP, one job at a time: that covers normal AI-generator
+    # output (1024-2048 px). For 4096 px upscales use Standard (2 GB) with MAX_MEGAPIXELS=17,
+    # MAX_CONCURRENT_JOBS=2.
+    plan: free
     region: frankfurt
     healthCheckPath: /health
     envVars:

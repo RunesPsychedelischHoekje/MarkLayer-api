@@ -15,6 +15,9 @@ class Settings(BaseSettings):
 
     app_name: str = "MarkLayer API"
     version: str = "0.1.0"
+    # Render sets RENDER_GIT_COMMIT to the deployed commit; /health shows it so you can tell
+    # which code is live. Empty when running locally.
+    render_git_commit: str = ""
     # RapidAPI adds this shared secret to every request it forwards (X-RapidAPI-Proxy-Secret).
     # Empty = check disabled (local dev).
     rapidapi_proxy_secret: str = ""

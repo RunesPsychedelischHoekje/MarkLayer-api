@@ -130,6 +130,14 @@ def test_rapidapi_secret_enforced(client, engine):
     assert client.get("/health").json()["status"] == "ok"  # health stays open
 
 
+def test_health_reports_deployed_commit(client, monkeypatch):
+    from app import main
+
+    assert client.get("/health").json()["commit"] is None  # local run: Render's variable not set
+    monkeypatch.setattr(main.settings, "render_git_commit", "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678")
+    assert client.get("/health").json()["commit"] == "a1b2c3d"
+
+
 def test_payload_tag_and_kind_roundtrip():
     for kind in ("ai_generated", "ai_edited"):
         bits, wid = new_payload(kind)

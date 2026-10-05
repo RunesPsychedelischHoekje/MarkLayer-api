@@ -57,6 +57,7 @@ def health() -> dict:
     return {
         "status": "ok",
         "version": settings.version,
+        "commit": settings.render_git_commit[:7] or None,
         "trust_lists": engine.c2pa.trust_lists_loaded if engine else [],
         "signer_trust_list": engine.c2pa.own_trust_list if engine else None,
         "limits": {"max_upload_mb": settings.max_upload_mb, "max_megapixels": settings.max_megapixels},

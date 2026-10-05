@@ -1,0 +1,341 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "MarkLayer API",
+    "description": "**MarkLayer**: machine-readable marking for AI-generated images, built for the EU AI Act (Article 50(2)) and California's AI Transparency Act.\n\n- `POST /v1/mark` adds three open-standard layers in one call: a signed **C2PA** manifest, an invisible **TrustMark** watermark that survives compression and resizing, and the **IPTC** `DigitalSourceType` that platforms read for \"AI info\" labels. You get a compliance receipt back.\n- `POST /v1/inspect` reports the provenance evidence in any image, video, audio file or PDF: C2PA validity and signer, watermarks, IPTC fields and generator traces (Stable Diffusion, ComfyUI, Midjourney...), with a verdict and label text in 10 EU languages.\n- `POST /v1/strip-check` shows which layers survive real-world edits.\n\nTechnical marking only: not legal advice or a certificate of compliance.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/v1/mark": {
+      "post": {
+        "tags": [
+          "Mark"
+        ],
+        "summary": "Mark an AI-generated image (C2PA + invisible watermark + IPTC)",
+        "operationId": "mark_endpoint_v1_mark_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_mark_endpoint_v1_mark_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The marked image (default), or JSON with the image in base64 plus the full receipt when `response=json`. Image responses carry `X-Watermark-Id` and `X-Receipt-Id` headers.",
+            "content": {
+              "image/jpeg": {},
+              "image/png": {},
+              "image/webp": {},
+              "application/json": {}
+            }
+          },
+          "413": {
+            "description": "File or image too large"
+          },
+          "415": {
+            "description": "Unsupported file format"
+          },
+          "422": {
+            "description": "Invalid input"
+          },
+          "503": {
+            "description": "Busy, retry shortly"
+          }
+        }
+      }
+    },
+    "/v1/inspect": {
+      "post": {
+        "tags": [
+          "Inspect"
+        ],
+        "summary": "Report the provenance signals in a file (upload or URL)",
+        "operationId": "inspect_upload_v1_inspect_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_inspect_upload_v1_inspect_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Inspect Upload V1 Inspect Post"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "File or image too large"
+          },
+          "415": {
+            "description": "Unsupported file format"
+          },
+          "422": {
+            "description": "Invalid input"
+          },
+          "503": {
+            "description": "Busy, retry shortly"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Inspect"
+        ],
+        "summary": "Report the provenance signals of a file at a public URL",
+        "operationId": "inspect_url_v1_inspect_get",
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 2048,
+              "description": "Public http(s) URL of an image, video, audio file or PDF.",
+              "title": "Url"
+            },
+            "description": "Public http(s) URL of an image, video, audio file or PDF."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Inspect Url V1 Inspect Get"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "File or image too large"
+          },
+          "415": {
+            "description": "Unsupported file format"
+          },
+          "422": {
+            "description": "Invalid input"
+          },
+          "503": {
+            "description": "Busy, retry shortly"
+          }
+        }
+      }
+    },
+    "/v1/strip-check": {
+      "post": {
+        "tags": [
+          "Mark"
+        ],
+        "summary": "Test which marking layers survive common edits (compression, resizing, screenshots)",
+        "operationId": "strip_check_endpoint_v1_strip_check_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_strip_check_endpoint_v1_strip_check_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Strip Check Endpoint V1 Strip Check Post"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "File or image too large"
+          },
+          "415": {
+            "description": "Unsupported file format"
+          },
+          "422": {
+            "description": "Invalid input"
+          },
+          "503": {
+            "description": "Busy, retry shortly"
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Meta"
+        ],
+        "summary": "Liveness check",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Body_inspect_upload_v1_inspect_post": {
+        "properties": {
+          "file": {
+            "anyOf": [
+              {
+                "type": "string",
+                "contentMediaType": "application/octet-stream"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File",
+            "description": "The file to inspect (images: all checks; video, audio, PDF: C2PA only)."
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2048
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url",
+            "description": "Or a public http(s) URL to download and inspect."
+          }
+        },
+        "type": "object",
+        "title": "Body_inspect_upload_v1_inspect_post"
+      },
+      "Body_mark_endpoint_v1_mark_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "JPEG, PNG or WebP image, up to 25 MB. The megapixel limit is shown by `/health`."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "ai_generated",
+              "ai_edited"
+            ],
+            "title": "Kind",
+            "description": "`ai_generated`: wholly made by AI (IPTC trainedAlgorithmicMedia). `ai_edited`: a real image changed with AI (IPTC compositeWithTrainedAlgorithmicMedia).",
+            "default": "ai_generated"
+          },
+          "generator": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generator",
+            "description": "Name of your AI system, e.g. `MyApp Image v2`. Recorded as the C2PA software agent and XMP CreatorTool."
+          },
+          "layers": {
+            "type": "string",
+            "title": "Layers",
+            "description": "Comma list: `c2pa`, `watermark`, `iptc`. Default all three. The EU Code of Practice expects at least two.",
+            "default": "c2pa,watermark,iptc"
+          },
+          "format": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "jpeg",
+                  "png",
+                  "webp"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Format",
+            "description": "Output format. Default: same as input."
+          },
+          "quality": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 50.0,
+            "title": "Quality",
+            "description": "JPEG/WebP quality.",
+            "default": 92
+          },
+          "response": {
+            "type": "string",
+            "enum": [
+              "image",
+              "json"
+            ],
+            "title": "Response",
+            "description": "`image` returns the file; `json` returns base64 + receipt.",
+            "default": "image"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_mark_endpoint_v1_mark_post"
+      },
+      "Body_strip_check_endpoint_v1_strip_check_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "A marked JPEG, PNG or WebP image."
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_strip_check_endpoint_v1_strip_check_post"
+      }
+    }
+  }
+}

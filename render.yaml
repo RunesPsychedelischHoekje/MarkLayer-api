@@ -1,0 +1,28 @@
+# Render Blueprint: New > Blueprint > pick this repo.
+services:
+  - type: web
+    name: marklayer-api
+    runtime: docker
+    # Starter ($7/mo, 512 MB, always on). Measured peak RSS while marking: 375 MB at 4.2 MP,
+    # 480 MB at 8.4 MP, 625 MB at 16.8 MP. So on Starter we cap uploads at 4.5 MP, one job at a time.
+    # That covers normal AI-generator output (1024-2048 px). For 4096 px upscales switch to
+    # Standard (2 GB) and set MAX_MEGAPIXELS=17, MAX_CONCURRENT_JOBS=2.
+    # Not the free plan: it sleeps when idle and every wake-up reloads the 64 MB of models.
+    plan: starter
+    region: frankfurt
+    healthCheckPath: /health
+    envVars:
+      - key: RAPIDAPI_PROXY_SECRET
+        sync: false   # Render asks you for the value; it never lives in git
+      - key: SIGNING_CERT_PEM
+        sync: false   # contents of secrets/signer-chain.pem (scripts/make_signing_cert.py)
+      - key: SIGNING_KEY_PEM
+        sync: false   # contents of secrets/signer-key.pem
+      - key: MAX_MEGAPIXELS
+        value: "4.5"
+      - key: MAX_CONCURRENT_JOBS
+        value: "1"
+      - key: TSA_URL
+        # Trusted timestamp on every signature: without it, manifests stop validating when the
+        # signing certificate expires (397 days), taking customers' compliance records with them.
+        value: http://timestamp.digicert.com

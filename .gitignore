@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.env
+secrets/
+models/
+data/
+spike/out/
+spike/images/

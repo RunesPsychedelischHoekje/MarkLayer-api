@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Image Marking Checker</title>
+<meta name="description" content="Free check: does your AI-generated image carry the machine-readable marking the EU AI Act (Article 50) asks for? C2PA Content Credentials, invisible watermark and IPTC AI tag.">
+<meta property="og:title" content="Is your AI image marked for the EU AI Act?">
+<meta property="og:description" content="Drop an image and see which AI markings it carries: C2PA, invisible watermark, IPTC. Free, nothing stored.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='10' width='18' height='18' rx='4' fill='%2394a3f8'/%3E%3Crect x='10' y='4' width='18' height='18' rx='4' fill='%234338ca'/%3E%3Cpath d='M14 13l3 3 6-6' stroke='white' stroke-width='2.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root {
+  --bg: #f7f7fb; --surface: #ffffff; --surface-2: #f0f1f7; --text: #15172b; --muted: #5b6078;
+  --border: #dfe1ec; --accent: #4338ca; --accent-text: #ffffff; --accent-soft: #e8e7fb;
+  --ok: #0f7b4f; --ok-soft: #dff3ea; --bad: #b42318; --bad-soft: #fde7e5; --warn: #9a6100; --warn-soft: #fdf1dc;
+  --shadow: 0 1px 2px rgba(20,22,45,.06), 0 8px 24px rgba(20,22,45,.06);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e0f17; --surface: #171926; --surface-2: #1f2232; --text: #eceef7; --muted: #a2a7c0;
+    --border: #2c3046; --accent: #8b93ff; --accent-text: #0e0f17; --accent-soft: #24264a;
+    --ok: #4ad49a; --ok-soft: #13301f; --bad: #ff8a7a; --bad-soft: #3a1714; --warn: #f2b54a; --warn-soft: #33270f;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e0f17; --surface: #171926; --surface-2: #1f2232; --text: #eceef7; --muted: #a2a7c0;
+  --border: #2c3046; --accent: #8b93ff; --accent-text: #0e0f17; --accent-soft: #24264a;
+  --ok: #4ad49a; --ok-soft: #13301f; --bad: #ff8a7a; --bad-soft: #3a1714; --warn: #f2b54a; --warn-soft: #33270f;
+  --shadow: none;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+a { color: var(--accent); }
+.wrap { max-width: 880px; margin: 0 auto; padding: 0 16px; }
+header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 0; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.01em; color: var(--text); text-decoration: none; }
+.brand svg { width: 28px; height: 28px; }
+nav.links { display: flex; gap: 16px; font-size: 15px; }
+nav.links a { color: var(--muted); text-decoration: none; }
+nav.links a:hover { color: var(--text); }
+.hero { padding: 28px 0 8px; }
+.chip { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 999px;
+  background: var(--warn-soft); color: var(--warn); font-size: 14px; font-weight: 600; }
+h1 { font-size: clamp(28px, 5vw, 42px); line-height: 1.12; letter-spacing: -.02em; margin: 16px 0 12px; }
+.lead { color: var(--muted); font-size: 18px; max-width: 640px; margin: 0; }
+.drop {
+  margin: 28px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  min-height: 210px; padding: 28px 16px; text-align: center; cursor: pointer;
+  background: var(--surface); border: 2px dashed var(--border); border-radius: 16px; box-shadow: var(--shadow);
+  transition: border-color .15s, background .15s;
+}
+.drop:hover, .drop.over { border-color: var(--accent); background: var(--accent-soft); }
+.drop:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
+.drop strong { font-size: 18px; }
+.drop span { color: var(--muted); font-size: 14px; }
+.drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.btn { display: inline-block; padding: 10px 18px; border-radius: 10px; background: var(--accent); color: var(--accent-text);
+  font-weight: 600; text-decoration: none; border: 0; font-size: 15px; cursor: pointer; }
+.btn.secondary { background: var(--surface-2); color: var(--text); }
+#result { margin-top: 24px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); padding: 20px; }
+.res-head { display: grid; grid-template-columns: 112px 1fr; gap: 18px; align-items: center; }
+.res-head img { width: 112px; height: 112px; object-fit: cover; border-radius: 10px; background: var(--surface-2); }
+.verdict { font-size: 22px; font-weight: 700; margin: 0 0 4px; letter-spacing: -.01em; }
+.summary { color: var(--muted); margin: 0; }
+.layers { list-style: none; padding: 0; margin: 20px 0 0; display: grid; gap: 10px; }
+.layer { display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: center; padding: 12px 14px;
+  border-radius: 12px; background: var(--surface-2); }
+.dot { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 18px; }
+.dot.ok { background: var(--ok-soft); color: var(--ok); }
+.dot.bad { background: var(--bad-soft); color: var(--bad); }
+.dot.na { background: var(--surface); color: var(--muted); }
+.layer b { display: block; }
+.layer small { color: var(--muted); display: block; overflow-wrap: anywhere; }
+.tag { font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.tag.ok { background: var(--ok-soft); color: var(--ok); }
+.tag.bad { background: var(--bad-soft); color: var(--bad); }
+.tag.na { background: var(--surface); color: var(--muted); }
+.extra { margin-top: 18px; display: grid; gap: 14px; }
+.extra h3 { font-size: 15px; margin: 0 0 6px; }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill { font-size: 14px; padding: 4px 10px; border-radius: 8px; background: var(--surface-2); }
+.cta { margin-top: 20px; padding: 18px; border-radius: 12px; background: var(--accent-soft); display: grid; gap: 10px; }
+.cta p { margin: 0; }
+.cta .row { display: flex; flex-wrap: wrap; gap: 10px; }
+.error { margin-top: 24px; padding: 14px 16px; border-radius: 12px; background: var(--bad-soft); color: var(--bad); }
+.spinner { width: 22px; height: 22px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2s; } }
+.loading { display: flex; gap: 12px; align-items: center; color: var(--muted); }
+section.info { padding: 48px 0 8px; }
+section.info h2 { font-size: 24px; letter-spacing: -.01em; margin: 0 0 16px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.grid3 .card h3 { margin: 0 0 6px; font-size: 17px; }
+.grid3 .card p { margin: 0; color: var(--muted); font-size: 15px; }
+details { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
+summary { cursor: pointer; font-weight: 600; }
+details p { color: var(--muted); margin: 10px 0 0; }
+footer { padding: 40px 0 32px; color: var(--muted); font-size: 14px; }
+@media (max-width: 640px) {
+  nav.links { gap: 12px; font-size: 14px; }
+  .grid3 { grid-template-columns: 1fr; }
+  .res-head { grid-template-columns: 72px 1fr; gap: 14px; }
+  .res-head img { width: 72px; height: 72px; }
+  .verdict { font-size: 19px; }
+  .layer { grid-template-columns: 30px 1fr; }
+  .layer .tag { grid-column: 2; justify-self: start; }
+  .dot { width: 30px; height: 30px; font-size: 15px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="10" width="18" height="18" rx="4" fill="#94a3f8"/><rect x="10" y="4" width="18" height="18" rx="4" fill="#4338ca"/><path d="M14 13l3 3 6-6" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      MarkLayer
+    </a>
+    <nav class="links">
+      <a href="https://rapidapi.com/RunesPsychedelischHoekje/api/marklayer">API</a>
+      <a href="https://github.com/RunesPsychedelischHoekje/comfyui-marklayer">ComfyUI node</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <span class="chip" id="deadline">EU AI Act Article 50: AI output must be machine-readably marked</span>
+      <h1>Is your AI image marked for the EU&nbsp;AI&nbsp;Act?</h1>
+      <p class="lead">Drop an image to see which machine-readable AI markings it carries: C2PA Content Credentials, an invisible watermark, and the IPTC "AI-generated" tag. Free, and nothing is stored.</p>
+
+      <label class="drop" id="drop">
+        <input type="file" id="file" accept="image/jpeg,image/png,image/webp,image/gif,image/tiff,image/avif,image/heic,video/mp4,video/quicktime,application/pdf">
+        <strong>Drop an image here, or click to choose</strong>
+        <span>JPEG, PNG, WebP and more, up to 10 MB. You can also paste from the clipboard.</span>
+      </label>
+
+      <div id="result" aria-live="polite"></div>
+    </section>
+
+    <section class="info">
+      <h2>What the check looks for</h2>
+      <div class="grid3">
+        <div class="card"><h3>C2PA Content Credentials</h3><p>A signed record inside the file saying it was made by AI, and by which tool. The standard the EU Code of Practice names.</p></div>
+        <div class="card"><h3>Invisible watermark</h3><p>An ID hidden in the pixels (Adobe TrustMark). It survives compression, resizing and social uploads that strip metadata.</p></div>
+        <div class="card"><h3>IPTC digital source type</h3><p>The metadata field Meta and Google read to show "AI info" labels on images.</p></div>
+      </div>
+      <p style="color:var(--muted);margin:16px 0 0">It also spots traces that generators leave behind: Stable Diffusion WebUI, ComfyUI, InvokeAI, NovelAI, Midjourney and more.</p>
+    </section>
+
+    <section class="info">
+      <h2>Questions</h2>
+      <details><summary>Who has to mark AI images?</summary><p>Under Article 50(2) of the EU AI Act, providers of generative AI systems whose output reaches people in the EU must mark it in a machine-readable way. That includes apps built on someone else's model. It applies to new systems since 2 August 2026, and to systems already on the market from 2 December 2026. The EU Code of Practice asks for at least two layers, such as signed metadata plus a watermark.</p></details>
+      <details><summary>"No signals" means the image is human-made?</summary><p>No. It means nothing in the file declares AI origin. Most platforms strip metadata on upload, and this checker reports evidence, it doesn't guess from pixels.</p></details>
+      <details><summary>Is my image stored?</summary><p>No. It's processed in memory on our server in the EU (Frankfurt) and discarded. Checks are limited to 10 per hour per visitor.</p></details>
+      <details><summary>Is this legal advice?</summary><p>No. MarkLayer is a technical tool. Whether and how you must mark content depends on your role and product; check with a lawyer.</p></details>
+    </section>
+  </main>
+
+  <footer>
+    MarkLayer adds and checks open-standard AI markings (C2PA, Adobe TrustMark, IPTC). Not legal advice.
+    · <a href="https://rapidapi.com/RunesPsychedelischHoekje/api/marklayer">API &amp; pricing</a>
+    · <a href="https://github.com/RunesPsychedelischHoekje/comfyui-marklayer">ComfyUI node</a>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const API_URL = "https://rapidapi.com/RunesPsychedelischHoekje/api/marklayer";
+  const NODE_URL = "https://github.com/RunesPsychedelischHoekje/comfyui-marklayer";
+  const drop = document.getElementById("drop");
+  const input = document.getElementById("file");
+  const out = document.getElementById("result");
+
+  // Deadline chip: days until marking applies to systems already on the market.
+  const deadline = new Date("2026-12-02T00:00:00+01:00");
+  const days = Math.ceil((deadline - new Date()) / 86400000);
+  const chip = document.getElementById("deadline");
+  chip.textContent = days > 0
+    ? `${days} day${days === 1 ? "" : "s"} until EU AI Act marking applies to existing AI systems (2 Dec 2026)`
+    : "EU AI Act Article 50 marking now applies to all generative AI systems";
+
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+
+  async function check(file) {
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { showError("That file is larger than 10 MB."); return; }
+    const preview = file.type.startsWith("image/") ? URL.createObjectURL(file) : "";
+    out.innerHTML = `<div class="card loading"><div class="spinner" aria-hidden="true"></div>Checking ${esc(file.name)}... (the first check can take up to a minute while the server wakes up)</div>`;
+    const fd = new FormData();
+    fd.append("file", file, file.name);
+    let res, body;
+    try {
+      res = await fetch("/public/check", { method: "POST", body: fd });
+      body = await res.json();
+    } catch (e) {
+      showError("Couldn't reach the checker. Check your connection and try again.");
+      return;
+    }
+    if (!res.ok) { showError(body?.error?.message || `Check failed (HTTP ${res.status}).`); return; }
+    render(body, preview, file.name);
+  }
+
+  function showError(msg) { out.innerHTML = `<div class="error" role="alert">${esc(msg)}</div>`; }
+
+  const VERDICTS = {
+    ai_generated: "Marked as AI-generated",
+    ai_edited: "Marked as edited with AI",
+    captured: "Marked as a camera capture",
+    no_signals: "No AI marking found",
+  };
+
+  function row(state, title, detail, tag) {
+    const sym = { ok: "✓", bad: "✕", na: "–" }[state];
+    return `<li class="layer"><span class="dot ${state}" aria-hidden="true">${sym}</span>
+      <span><b>${esc(title)}</b><small>${esc(detail)}</small></span>
+      <span class="tag ${state}">${esc(tag)}</span></li>`;
+  }
+
+  function render(r, preview, name) {
+    const c = r.c2pa || {};
+    const w = r.watermark;
+    const iptc = r.iptc;
+    const dstName = v => (v || "").split("/").pop();
+
+    let c2paRow;
+    if (!c.present) c2paRow = row("bad", "C2PA Content Credentials", "No signed manifest in this file.", "Not found");
+    else if (!c.valid) c2paRow = row("bad", "C2PA Content Credentials", "A manifest is present but failed validation.", "Invalid");
+    else {
+      const s = c.signer || {};
+      const types = (c.digital_source_types || []).map(dstName).join(", ") || "no source type";
+      const trust = s.trusted ? `signer on the ${s.trust_list} trust list` : "signer not on a C2PA trust list";
+      c2paRow = row("ok", "C2PA Content Credentials", `Signed by ${s.issuer || "unknown"} (${trust}). Declares: ${types}.`, "Found");
+    }
+    let wmRow;
+    if (!w) wmRow = row("na", "Invisible watermark", "Only checked on images.", "n/a");
+    else if (w.detected) wmRow = row("ok", "Invisible watermark", `TrustMark watermark found${w.issuer === "MarkLayer" ? " (MarkLayer, ID " + w.watermark_id + ")" : ""}.`, "Found");
+    else wmRow = row("bad", "Invisible watermark", "No TrustMark watermark in the pixels.", "Not found");
+    let iptcRow;
+    if (!iptc) iptcRow = row("na", "IPTC digital source type", "Only checked on images.", "n/a");
+    else if (iptc.digital_source_type) iptcRow = row("ok", "IPTC digital source type", dstName(iptc.digital_source_type), "Found");
+    else iptcRow = row("bad", "IPTC digital source type", "No DigitalSourceType tag in the metadata.", "Not found");
+
+    const found = [c.present && c.valid, w && w.detected, iptc && iptc.digital_source_type].filter(Boolean).length;
+    const gens = (r.generators || []).map(g => `<span class="pill">${esc(g.name)}</span>`).join("");
+    const labels = r.label_suggestions ? Object.entries(r.label_suggestions)
+      .map(([k, v]) => `<span class="pill"><b>${esc(k)}</b> ${esc(v)}</span>`).join("") : "";
+
+    let cta;
+    if (found >= 2) {
+      cta = `<p><b>${found} of 3 layers present.</b> The EU Code of Practice asks for at least two, so this file looks well covered. Remember that uploads to social platforms usually strip the metadata layers; the watermark is the one that survives.</p>`;
+    } else {
+      cta = `<p><b>${found} of 3 layers present.</b> The EU Code of Practice asks for at least two machine-readable layers. MarkLayer adds all three (C2PA, invisible watermark, IPTC) in one API call.</p>
+        <div class="row"><a class="btn" href="${API_URL}">Get the API (free plan)</a><a class="btn secondary" href="${NODE_URL}">ComfyUI node</a></div>`;
+    }
+
+    out.innerHTML = `<div class="card">
+      <div class="res-head">${preview ? `<img src="${preview}" alt="">` : `<div></div>`}
+        <div><p class="verdict">${esc(VERDICTS[r.verdict] || r.verdict)}</p><p class="summary">${esc(r.summary)}</p>
+        <p class="summary" style="font-size:14px;margin-top:4px">${esc(name)}</p></div></div>
+      <ul class="layers">${c2paRow}${wmRow}${iptcRow}</ul>
+      <div class="extra">
+        ${gens ? `<div><h3>Generator traces</h3><div class="pills">${gens}</div></div>` : ""}
+        ${labels ? `<div><h3>Suggested visible label</h3><div class="pills">${labels}</div></div>` : ""}
+      </div>
+      <div class="cta">${cta}</div>
+    </div>`;
+  }
+
+  input.addEventListener("change", () => check(input.files[0]));
+  ["dragenter", "dragover"].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", ev => check(ev.dataTransfer.files[0]));
+  document.addEventListener("paste", ev => {
+    const item = [...(ev.clipboardData?.items || [])].find(i => i.kind === "file");
+    if (item) check(item.getAsFile());
+  });
+})();
+</script>
+</body>
+</html>

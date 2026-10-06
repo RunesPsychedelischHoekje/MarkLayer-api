@@ -8,7 +8,8 @@ from fastapi.exceptions import RequestValidationError
 from app.config import get_settings
 from app.engine import Engine
 from app.errors import ApiError, api_error_handler, validation_error_handler
-from app.routers import v1
+from app.ratelimit import RateLimiter
+from app.routers import public, v1
 
 settings = get_settings()
 
@@ -17,6 +18,8 @@ settings = get_settings()
 async def lifespan(app: FastAPI):
     if not hasattr(app.state, "engine"):  # tests may install their own
         app.state.engine = Engine(settings)
+    if not hasattr(app.state, "public_limiter"):
+        app.state.public_limiter = RateLimiter(settings.public_checks_per_hour, 3600, settings.public_daily_cap)
     yield
 
 
@@ -40,6 +43,7 @@ app = FastAPI(
 app.add_exception_handler(ApiError, api_error_handler)
 app.add_exception_handler(RequestValidationError, validation_error_handler)
 app.include_router(v1.router)
+app.include_router(public.router)
 
 
 @app.middleware("http")

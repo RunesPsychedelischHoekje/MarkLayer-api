@@ -44,6 +44,12 @@ class Settings(BaseSettings):
     # For /v1/inspect?url=...
     fetch_timeout_s: float = 15.0
 
+    # Free checker page (GET /, POST /public/check): per-IP and whole-server limits, so scripts
+    # can't use it as an unpaid API and the CPU stays free for paying customers.
+    public_checks_per_hour: int = 10
+    public_daily_cap: int = 1000
+    public_max_upload_mb: int = 10
+
 
 @lru_cache
 def get_settings() -> Settings:

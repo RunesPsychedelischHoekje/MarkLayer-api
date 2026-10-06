@@ -9,6 +9,7 @@ AI Transparency Act (SB 942). Built with FastAPI.
 | `POST /v1/inspect` / `GET /v1/inspect?url=` | Reports the provenance evidence in a file: C2PA validity, signer and trust list, watermark, IPTC fields, generator traces (A1111, Forge, ComfyUI, InvokeAI, NovelAI, Midjourney, EXIF names). Verdict plus label text in 10 EU languages. |
 | `POST /v1/strip-check` | Re-encodes a marked image 9 ways (JPEG, WebP, social resize, screenshot, crop, grayscale...) and reports which layers survive. |
 | `GET /` (public) | Free checker page: drop an image, see which layers it carries, with links to the API. Calls `POST /public/check`, which skips RapidAPI, is hidden from the API docs and is rate-limited per IP (10/hour, 1000/day in total, 10 MB). |
+| `GET /robots.txt`, `/sitemap.xml`, `/og.png` (public) | For search engines and link previews. Canonical, sitemap and share-image URLs use `PUBLIC_BASE_URL`: set it when the site moves to its own domain. `scripts/make_og_image.py` redraws the share image. |
 
 Why three layers: the EU Code of Practice on marking AI content (June 2026) expects at least two.
 Metadata (C2PA, IPTC) is what platforms read, but any re-encode strips it. The watermark sits in the
@@ -23,7 +24,7 @@ C2PA verifier (e.g. contentcredentials.org/verify) reads our manifest.
 python -m venv .venv
 .venv/Scripts/pip install -r requirements-dev.txt
 .venv/Scripts/python scripts/fetch_assets.py    # watermark models (64 MB) + C2PA trust lists
-.venv/Scripts/python -m pytest                  # 52 tests, no network needed after fetch_assets
+.venv/Scripts/python -m pytest                  # 56 tests, no network needed after fetch_assets
 .venv/Scripts/fastapi dev app/main.py           # docs at http://127.0.0.1:8000/docs
 ```
 

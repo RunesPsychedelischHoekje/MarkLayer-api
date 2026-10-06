@@ -49,6 +49,9 @@ class Settings(BaseSettings):
     public_checks_per_hour: int = 10
     public_daily_cap: int = 1000
     public_max_upload_mb: int = 10
+    # Where the public site lives: used for canonical links, the sitemap and share previews.
+    # Change it (PUBLIC_BASE_URL) when the site moves to its own domain.
+    public_base_url: str = "https://marklayer-api.onrender.com"
 
 
 @lru_cache

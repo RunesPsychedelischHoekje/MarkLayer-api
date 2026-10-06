@@ -5,8 +5,46 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Image Marking Checker</title>
 <meta name="description" content="Free check: does your AI-generated image carry the machine-readable marking the EU AI Act (Article 50) asks for? C2PA Content Credentials, invisible watermark and IPTC AI tag.">
+<link rel="canonical" href="{{BASE_URL}}/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{BASE_URL}}/">
+<meta property="og:site_name" content="MarkLayer">
 <meta property="og:title" content="Is your AI image marked for the EU AI Act?">
 <meta property="og:description" content="Drop an image and see which AI markings it carries: C2PA, invisible watermark, IPTC. Free, nothing stored.">
+<meta property="og:image" content="{{BASE_URL}}/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Is your AI image marked for the EU AI Act? Free check for C2PA, invisible watermark and IPTC.">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "name": "MarkLayer AI Image Marking Checker",
+      "url": "{{BASE_URL}}/",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Any (web browser)",
+      "description": "Free check of whether an AI-generated image carries the machine-readable marking the EU AI Act (Article 50) asks for: C2PA Content Credentials, an invisible TrustMark watermark and the IPTC digital source type.",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "Who has to mark AI images?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Under Article 50(2) of the EU AI Act, providers of generative AI systems whose output reaches people in the EU must mark it in a machine-readable way. That includes apps built on someone else's model. It applies to new systems since 2 August 2026, and to systems already on the market from 2 December 2026. The EU Code of Practice asks for at least two layers, such as signed metadata plus a watermark." } },
+        { "@type": "Question", "name": "\"No signals\" means the image is human-made?",
+          "acceptedAnswer": { "@type": "Answer", "text": "No. It means nothing in the file declares AI origin. Most platforms strip metadata on upload, and this checker reports evidence, it doesn't guess from pixels." } },
+        { "@type": "Question", "name": "Is my image stored?",
+          "acceptedAnswer": { "@type": "Answer", "text": "No. It's processed in memory on our server in the EU (Frankfurt) and discarded. Checks are limited to 10 per hour per visitor." } },
+        { "@type": "Question", "name": "Is this legal advice?",
+          "acceptedAnswer": { "@type": "Answer", "text": "No. MarkLayer is a technical tool. Whether and how you must mark content depends on your role and product; check with a lawyer." } }
+      ]
+    }
+  ]
+}
+</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='10' width='18' height='18' rx='4' fill='%2394a3f8'/%3E%3Crect x='10' y='4' width='18' height='18' rx='4' fill='%234338ca'/%3E%3Cpath d='M14 13l3 3 6-6' stroke='white' stroke-width='2.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>
 :root {

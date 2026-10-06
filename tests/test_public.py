@@ -95,6 +95,19 @@ def test_base_url_follows_setting(client):
     public._page.cache_clear()
 
 
+def test_search_engine_verification_tags(client):
+    html = client.get("/").text
+    assert '<meta name="google-site-verification" content="IZPzAZVVMYufE84qDPvQL-AV0DTpY5dTaDK_l_fyvT8">' in html
+    assert "msvalidate.01" not in html  # no Bing code configured
+    assert "{{VERIFY_TAGS}}" not in html
+    app.dependency_overrides[get_settings] = lambda: Settings(google_site_verification="", bing_site_verification='b"<x')
+    public._page.cache_clear()
+    html = client.get("/").text
+    assert "google-site-verification" not in html
+    assert '<meta name="msvalidate.01" content="b&quot;&lt;x">' in html  # escaped, can't break out of the tag
+    public._page.cache_clear()
+
+
 def test_share_image_and_head(client):
     r = client.get("/og.png")
     assert r.status_code == 200 and r.headers["content-type"] == "image/png"

@@ -4,6 +4,7 @@ Public on purpose: no RapidAPI key, so anyone can try MarkLayer's inspection on 
 time. Kept out of the OpenAPI schema so it doesn't show up as an endpoint in the RapidAPI listing,
 and rate-limited per IP so scripts can't use it as a free API. Uploads only: no URL fetching here.
 """
+import html
 from functools import lru_cache
 from pathlib import Path
 from typing import Annotated
@@ -28,14 +29,21 @@ def get_limiter(request: Request) -> RateLimiter:
 
 
 @lru_cache
-def _page(base_url: str) -> str:
-    return (STATIC / "check.html").read_text(encoding="utf-8").replace("{{BASE_URL}}", base_url)
+def _page(base_url: str, google: str, bing: str) -> str:
+    tags = "".join(
+        f'<meta name="{name}" content="{html.escape(value, quote=True)}">\n'
+        for name, value in (("google-site-verification", google), ("msvalidate.01", bing)) if value
+    )
+    page = (STATIC / "check.html").read_text(encoding="utf-8")
+    return page.replace("{{VERIFY_TAGS}}", tags).replace("{{BASE_URL}}", base_url)
 
 
 # HEAD too: link checkers and uptime monitors often use it, and a 405 there looks like a broken site.
 @router.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
 def checker_page(settings: SettingsDep) -> HTMLResponse:
-    return HTMLResponse(_page(settings.public_base_url.rstrip("/")), headers=CACHE)
+    page = _page(settings.public_base_url.rstrip("/"), settings.google_site_verification.strip(),
+                 settings.bing_site_verification.strip())
+    return HTMLResponse(page, headers=CACHE)
 
 
 @router.api_route("/robots.txt", methods=["GET", "HEAD"], response_class=PlainTextResponse)

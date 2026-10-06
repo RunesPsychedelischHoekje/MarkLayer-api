@@ -52,6 +52,10 @@ class Settings(BaseSettings):
     # Where the public site lives: used for canonical links, the sitemap and share previews.
     # Change it (PUBLIC_BASE_URL) when the site moves to its own domain.
     public_base_url: str = "https://marklayer-api.onrender.com"
+    # Search engine ownership checks: the `content` of each verification meta tag. Public by design.
+    # Google's is for the URL-prefix property https://marklayer-api.onrender.com/ in Search Console.
+    google_site_verification: str = "IZPzAZVVMYufE84qDPvQL-AV0DTpY5dTaDK_l_fyvT8"
+    bing_site_verification: str = ""
 
 
 @lru_cache

@@ -46,6 +46,8 @@ MarkLayer does it in one API call, using open standards only:
 
 **Open, not proprietary.** Anyone can verify the result: any C2PA verifier reads the manifest, and Adobe's open-source TrustMark library decodes the watermark. You aren't locked into us for detection.
 
+**Try it without signing up:** drop any image into the [free checker](https://marklayer-api.onrender.com/) to see which of the three layers it already carries.
+
 ## Endpoints
 
 - **`POST /v1/mark`**: upload a JPEG, PNG or WebP and get it back marked (same format by default), plus a compliance receipt (hashes, layers applied, watermark ID) for your documentation.
@@ -136,6 +138,8 @@ No false detections on 138 unmarked image variants. Invisible to the eye: PSNR ~
 - **Watermark limits:** heavy crops (more than ~10% per side) remove it. On images wider or taller than 2:1 only the centre square is marked. No watermark resists a determined attacker.
 - **Inspect reports evidence, not guesses.** `no_signals` means nothing was declared, not that a human made the image.
 - **Privacy:** files are processed in memory and never stored. Hosted in the EU (Frankfurt).
+
+Check a single image for free at [marklayer-api.onrender.com](https://marklayer-api.onrender.com/). Using ComfyUI? There's a [ready-made node](https://github.com/RunesPsychedelischHoekje/comfyui-marklayer).
 
 Questions or a format you need (audio, video)? Open a thread in the **Discussions** tab.
 
